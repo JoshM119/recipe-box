@@ -10,11 +10,27 @@ const savedArea = document.getElementById("saved");
 
 
 async function getRecipe() {
+
     recipeArea.textContent = "";
 
+    if (input.value === "") {
+    getStatus.textContent = "Type a number first";
+    return;
+    }
+    try{
+    getStatus.textContent = "Loading...";
+
     const response = await fetch(`https://dummyjson.com/recipes/${input.value}`);
+
+    if(!response.ok) {
+        getStatus.textContent = "No recipe with that number. Try 1 to 50.";
+        return;
+    }
+
     const recipe = await response.json();
     console.log(recipe);
+
+    getStatus.textContent = "";
 
     const card = document.createElement("div");
     card.className = "card p-3 mb-5 w-50";
@@ -38,20 +54,40 @@ async function getRecipe() {
     recipeArea.appendChild(card);
 
     input.value = "";
+}catch(error){
+    console.error(error);
+    getStatus.textContent = "Can't reach the internet."
+}
 }
 
 
 getBtn.addEventListener("click", getRecipe);
 
 async function addDish() {
+    savedArea.textContent = "";
+
+    if ( dishInput.value === "") {
+        postStatus.textContent = "Type a dish first.";
+        return;
+    }
+    try{
+    postStatus.textContent = "Sending...";
+
     const response = await fetch("https://dummyjson.com/recipes/add", {
         method: "POST",
         headers: { "Content-Type": "Application/json" },
         body: JSON.stringify({ name: dishInput.value })
     });
 
+    if(!response.ok) {
+        postStatus.textContent = "The server didn't add it. Try again.";
+        return;
+    }
+
     const newDish = await response.json();
     console.log(newDish);
+
+    postStatus.textContent = "";
 
     const message = document.createElement("p");
     message.className = "alert alert-success";
@@ -59,6 +95,10 @@ async function addDish() {
     savedArea.appendChild(message);
 
     dishInput.value = "";
+}catch(error) {
+    console.error(error)
+    postStatus.textContent = "Can't reach the internet.";
+}
 }
 
 postBtn.addEventListener("click", addDish);
